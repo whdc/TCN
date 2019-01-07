@@ -58,11 +58,11 @@ if torch.cuda.is_available():
 
 
 print(args)
-file, file_len, valfile, valfile_len, testfile, testfile_len, corpus = data_generator(args)
+trainfile, validfile, testfile, corpus = data_generator(args)
 
 n_characters = len(corpus.dict)
-train_data = batchify(char_tensor(corpus, file), args.batch_size, args)
-val_data = batchify(char_tensor(corpus, valfile), 1, args)
+train_data = batchify(char_tensor(corpus, trainfile), args.batch_size, args)
+valid_data = batchify(char_tensor(corpus, validfile), 1, args)
 test_data = batchify(char_tensor(corpus, testfile), 1, args)
 print("Corpus size: ", n_characters)
 
@@ -159,7 +159,7 @@ def main():
         for epoch in range(1, args.epochs + 1):
             loss = train(epoch)
 
-            vloss = evaluate(val_data)
+            vloss = evaluate(valid_data)
             print('-' * 89)
             print('| End of epoch {:3d} | valid loss {:5.3f} | valid bpc {:8.3f}'.format(
                 epoch, vloss, vloss / math.log(2)))

@@ -11,25 +11,16 @@ cuda = torch.cuda.is_available()
 
 
 def data_generator(args):
-    file, testfile, valfile = getattr(observations, args.dataset)('data/')
-    file_len = len(file)
-    valfile_len = len(valfile)
-    testfile_len = len(testfile)
-    corpus = Corpus(file + " " + valfile + " " + testfile)
+    if hasattr(observations, args.dataset):
+      trainfile, testfile, validfile = getattr(observations, args.dataset)('data/')
+    else:
+      trainfile = open('data/%s/train.txt' % args.dataset).read()
+      validfile = open('data/%s/valid.txt' % args.dataset).read()
+      testfile  = open('data/%s/test.txt'  % args.dataset).read()
 
-    #############################################################
-    # Use the following if you want to pickle the loaded data
-    #
-    # pickle_name = "{0}.corpus".format(args.dataset)
-    # if os.path.exists(pickle_name):
-    #     corpus = pickle.load(open(pickle_name, 'rb'))
-    # else:
-    #     corpus = Corpus(file + " " + valfile + " " + testfile)
-    #     pickle.dump(corpus, open(pickle_name, 'wb'))
-    #############################################################
+    corpus = Corpus(trainfile + " " + validfile + " " + testfile)
 
-    return file, file_len, valfile, valfile_len, testfile, testfile_len, corpus
-
+    return trainfile, validfile, testfile, corpus
 
 def read_file(filename):
     file = unidecode.unidecode(open(filename).read())
