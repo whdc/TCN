@@ -58,12 +58,11 @@ if torch.cuda.is_available():
 
 
 print(args)
-trainfile, validfile, testfile, corpus = data_generator(args)
+trainstr, validstr, teststr, n_characters, idx_ans = data_generator(args)
 
-n_characters = len(corpus.dict)
-train_data = batchify(char_tensor(corpus, trainfile), args.batch_size, args)
-valid_data = batchify(char_tensor(corpus, validfile), 1, args)
-test_data = batchify(char_tensor(corpus, testfile), 1, args)
+train_data = batchify(trainstr, args.batch_size, args)
+valid_data = batchify(validstr, 1, args)
+test_data = batchify(teststr, 1, args)
 print("Corpus size: ", n_characters)
 
 

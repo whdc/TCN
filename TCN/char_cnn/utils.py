@@ -20,7 +20,13 @@ def data_generator(args):
 
     corpus = Corpus(trainfile + " " + validfile + " " + testfile)
 
-    return trainfile, validfile, testfile, corpus
+    trainstr = char_tensor(corpus, trainfile)
+    validstr = char_tensor(corpus, validfile)
+    teststr = char_tensor(corpus, testfile)
+    n_characters = len(corpus.dict)
+    idx_ans = corpus.dict.char2idx['ª']
+
+    return trainstr, validstr, teststr, n_characters, idx_ans
 
 def read_file(filename):
     file = unidecode.unidecode(open(filename).read())
