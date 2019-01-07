@@ -1,6 +1,14 @@
 # TCN, co-opted for Quora Insincere Questions Kaggle Competition
 
-Copy Kaggle CSV files to `quora-data/` and run `cd quora-data; Rscript clean.r`.
+1. Copy Kaggle CSV files to `quora-data/` and run `cd quora-data; Rscript clean.r`. (Install R to run this script.)
+
+2. In the Python env of your choice (I use conda) install Pytorch and Scipy (and other things I forget).
+
+3. Run `export PYTHONPATH=/path/to/toplevel/TCN`
+
+4. In `TCN/char_cnn` run `python char_cnn_test.py --dataset quora-small --levels 3 --ksize 5 --nhid 700 --optim='Adam' --lr 2e-3`
+
+Use `--dataset quora` for full Quora dataset.
 
 # Sequence Modeling Benchmarks and Temporal Convolutional Networks (TCN)
 
