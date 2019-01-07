@@ -1,5 +1,8 @@
-# Sequence Modeling Benchmarks and Temporal Convolutional Networks (TCN)
+# TCN, co-opted for Quora Insincere Questions Kaggle Competition
 
+Copy Kaggle CSV files to `quora-data/` and run `cd quora-data; Rscript clean.r`.
+
+# Sequence Modeling Benchmarks and Temporal Convolutional Networks (TCN)
 
 This repository contains the experiments done in the work [An Empirical Evaluation of Generic Convolutional and Recurrent Networks for Sequence Modeling](https://arxiv.org/abs/1803.01271) by Shaojie Bai, J. Zico Kolter and Vladlen Koltun.
 
