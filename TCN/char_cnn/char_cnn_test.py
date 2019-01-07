@@ -18,6 +18,8 @@ parser.add_argument('--batch_size', type=int, default=32, metavar='N',
                     help='batch size (default: 32)')
 parser.add_argument('--cuda', action='store_false',
                     help='use CUDA (default: True)')
+parser.add_argument('--gpu', type=int, default=0,
+                    help='which GPU to use')
 parser.add_argument('--dropout', type=float, default=0.1,
                     help='dropout applied to layers (default: 0.1)')
 parser.add_argument('--emb_dropout', type=float, default=0.1,
@@ -76,7 +78,7 @@ model = TCN(args.emsize, n_characters, num_chans, kernel_size=k_size, dropout=dr
 
 
 if args.cuda:
-    model.cuda()
+    model.cuda(args.gpu)
 
 
 criterion = nn.CrossEntropyLoss(reduction='none')

@@ -46,3 +46,37 @@ python char_cnn_test.py --dataset ptb
 would (download if no data found, and) train on the PennTreebank (PTB) dataset.
 
 - Empirically, we found that Adam works better than SGD on the text8 dataset.
+
+# Runs
+
+```
+python char_cnn_test.py --dataset quora --levels 3 --ksize 5 --nhid 600
+
+| End of epoch   6 | test loss 1.083 | test bpc    1.563
+```
+
+```
+python char_cnn_test.py --dataset quora --levels 3 --ksize 5 --nhid 500 --optim='Adam' --lr 2e-3
+
+| End of epoch  51 | valid loss 1.057 | valid bpc    1.525
+| End of epoch  51 | test loss 1.058 | test bpc    1.527
+```
+
+```
+python char_cnn_test.py --dataset quora --levels 3 --ksize 5 --nhid 700 --optim='Adam' --lr 2e-3
+
+| End of epoch  33 | valid loss 1.035 | valid bpc    1.493
+| End of epoch  33 | test loss 1.036 | test bpc    1.494
+```
+
+```
+python char_cnn_test.py --dataset quora --levels 4 --ksize 5 --nhid 1000 --optim='Adam' --lr 2e-3
+
+-----------------------------------------------------------------------------------------
+| Epoch  13 | valid aux  loss 1.032 | bpc    1.489
+| Epoch  13 | valid main loss 0.148 | bpc    0.214 | F1 0.366
+-----------------------------------------------------------------------------------------
+| Epoch  13 | test  aux  loss 1.034 | bpc    1.491
+| Epoch  13 | test  main loss 0.149 | bpc    0.215 | F1 0.262
+-----------------------------------------------------------------------------------------
+```

@@ -71,7 +71,7 @@ def char_tensor(corpus, string):
     tensor = torch.zeros(len(string)).long()
     for i in range(len(string)):
         tensor[i] = corpus.dict.char2idx[string[i]]
-    return Variable(tensor).cuda() if cuda else Variable(tensor)
+    return Variable(tensor).cuda(args.gpu) if cuda else Variable(tensor)
 
 
 def batchify(data, batch_size, args):
@@ -83,7 +83,7 @@ def batchify(data, batch_size, args):
     # Evenly divide the data across the batch_size batches.
     data = data.view(batch_size, -1)
     if args.cuda:
-        data = data.cuda()
+        data = data.cuda(args.gpu)
     return data
 
 
