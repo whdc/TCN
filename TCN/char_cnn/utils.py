@@ -5,6 +5,7 @@ from collections import Counter
 import observations
 import os
 import pickle
+import numpy as np
 
 
 cuda = torch.cuda.is_available()
@@ -20,13 +21,19 @@ def data_generator(args):
 
     corpus = Corpus(trainfile + " " + validfile + " " + testfile)
 
-    trainstr = char_tensor(corpus, trainfile)
-    validstr = char_tensor(corpus, validfile)
-    teststr = char_tensor(corpus, testfile)
-    n_characters = len(corpus.dict)
-    idx_ans = corpus.dict.char2idx['ª']
+    if os.path.exists('data/' + args.dataset + '/data.pkl'):
+      data = pickle.load(open('data/' + args.dataset + '/data.pkl', 'rb'))
+    else:
+      trainstr = char_tensor(corpus, trainfile)
+      validstr = char_tensor(corpus, validfile)
+      teststr = char_tensor(corpus, testfile)
+      n_characters = len(corpus.dict)
+      idx_ans = corpus.dict.char2idx['ª']
+      idx_one = corpus.dict.char2idx['1']
+      data = (trainstr, validstr, teststr, n_characters, idx_ans, idx_one)
+      pickle.dump(data, open('data/' + args.dataset + '/data.pkl', 'wb'))
 
-    return trainstr, validstr, teststr, n_characters, idx_ans
+    return data
 
 def read_file(filename):
     file = unidecode.unidecode(open(filename).read())
@@ -93,4 +100,24 @@ def save(model):
     torch.save(model, save_filename)
     print('Saved as %s' % save_filename)
 
+def max_f1(labels, scores):
+  # Sort labels by scores.
+  y = np.array([l for l, s, in sorted(zip(labels, scores), key=lambda x: x[1])])
+  
+  tc = np.sum(y)
+  fc = len(y) - tc
+  fp = np.cumsum(y)
+  tp = tc - fp
+  tn = np.arange(1, len(y)+1) - fp
+  fn = fc - tn
+  precis = tp / (tp + fp)
+  recall = tp / (tp + fn)
+  f1 = 2 * (precis * recall) / (precis + recall)
 
+  # print('tp', tp)
+  # print('fp', fp)
+  # print('tn', tn)
+  # print('fn', fn)
+  # print('f1', f1)
+
+  return np.nanmax(f1)

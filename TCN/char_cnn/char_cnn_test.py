@@ -58,7 +58,7 @@ if torch.cuda.is_available():
 
 
 print(args)
-trainstr, validstr, teststr, n_characters, idx_answer = data_generator(args)
+trainstr, validstr, teststr, n_characters, idx_answer, idx_one = data_generator(args)
 
 train_data = batchify(trainstr, args.batch_size, args)
 valid_data = batchify(validstr, 1, args)
@@ -89,6 +89,10 @@ def evaluate(source):
     aux_loss_denom = 0
     main_loss_numer = 0
     main_loss_denom = 0
+
+    labels = []
+    scores = []
+
     source_len = source.size(1)
     for batch, i in enumerate(range(0, source_len - 1, args.validseqlen)):
         if i + args.seq_len - args.validseqlen >= source_len:
@@ -98,17 +102,23 @@ def evaluate(source):
         eff_history = args.seq_len - args.validseqlen
         final_output = output[:, eff_history:].contiguous().view(-1, n_characters)
         final_target = target[:, eff_history:].contiguous().view(-1)
-        answer_positions = torch.eq(inp[:, eff_history:].contiguous().view(-1), idx_answer).float()
+        answer = torch.eq(inp[:, eff_history:].contiguous().view(-1), idx_answer)
+        answerf = answer.float()
         loss = eval_criterion(final_output, final_target)
 
         aux_loss_numer += loss.sum().item()
         aux_loss_denom += loss.size(0)
-        main_loss_numer += (loss * answer_positions).sum().item()
-        main_loss_denom += answer_positions.sum().item()
+        main_loss_numer += (loss * answerf).sum().item()
+        main_loss_denom += answerf.sum().item()
+
+        answer = answer.cpu().numpy()
+        labels.extend(np.equal(final_target.cpu().numpy()[answer], idx_one, dtype='int'))
+        scores.extend(final_output[:, idx_one].cpu().detach().numpy()[answer])
 
     aux_loss = aux_loss_numer / aux_loss_denom
     main_loss = main_loss_numer / main_loss_denom
-    return aux_loss, main_loss
+
+    return aux_loss, main_loss, max_f1(labels, scores)
 
 
 def train(epoch):
@@ -165,22 +175,22 @@ def main():
         for epoch in range(1, args.epochs + 1):
             loss = train(epoch)
 
-            valid_aux_loss, valid_main_loss = evaluate(valid_data)
-            vloss = valid_aux_loss
             print('-' * 89)
-            print('| End of epoch {:3d} | valid aux  loss {:5.3f} | bpc {:8.3f}'.format(
+            valid_aux_loss, valid_main_loss, f1 = evaluate(valid_data)
+            vloss = valid_aux_loss
+            print('| Epoch {:3d} | valid aux  loss {:5.3f} | bpc {:8.3f}'.format(
                 epoch, valid_aux_loss, valid_aux_loss / math.log(2)))
-            print('| End of epoch {:3d} | valid main loss {:5.3f} | bpc {:8.3f}'.format(
-                epoch, valid_main_loss, valid_main_loss / math.log(2)))
+            print('| Epoch {:3d} | valid main loss {:5.3f} | bpc {:8.3f} | F1 {:5.3f}'.format(
+                epoch, valid_main_loss, valid_main_loss / math.log(2), f1))
 
-            test_aux_loss, test_main_loss = evaluate(test_data)
+            print('-' * 89)
+            test_aux_loss, test_main_loss, f1 = evaluate(test_data)
             test_loss = test_aux_loss
-            print('=' * 89)
-            print('| End of epoch {:3d} | test  aux  loss {:5.3f} | bpc {:8.3f}'.format(
+            print('| Epoch {:3d} | test  aux  loss {:5.3f} | bpc {:8.3f}'.format(
                 epoch, test_aux_loss, test_aux_loss / math.log(2)))
-            print('| End of epoch {:3d} | test  main loss {:5.3f} | bpc {:8.3f}'.format(
-                epoch, test_main_loss, test_main_loss / math.log(2)))
-            print('=' * 89)
+            print('| Epoch {:3d} | test  main loss {:5.3f} | bpc {:8.3f} | F1 {:5.3f}'.format(
+                epoch, test_main_loss, test_main_loss / math.log(2), f1))
+            print('-' * 89)
 
             if epoch > 5 and vloss > max(all_losses[-3:]):
                 lr = lr / 10.
