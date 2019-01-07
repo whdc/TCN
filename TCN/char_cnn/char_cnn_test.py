@@ -34,6 +34,8 @@ parser.add_argument('--log-interval', type=int, default=100, metavar='N',
                     help='report interval (default: 100')
 parser.add_argument('--lr', type=float, default=4,
                     help='initial learning rate (default: 4)')
+parser.add_argument('--main', type=float, default=0,
+                    help='scale main loss before adding to aux loss (default: 0)')
 parser.add_argument('--emsize', type=int, default=100,
                     help='dimension of character embeddings (default: 100)')
 parser.add_argument('--optim', type=str, default='SGD',
@@ -77,18 +79,19 @@ if args.cuda:
     model.cuda()
 
 
-criterion = nn.CrossEntropyLoss()
-eval_criterion = nn.CrossEntropyLoss(reduction='none')
+criterion = nn.CrossEntropyLoss(reduction='none')
 lr = args.lr
 optimizer = getattr(optim, args.optim)(model.parameters(), lr=lr)
 
 
 def evaluate(source):
     model.eval()
-    aux_loss_numer = 0
-    aux_loss_denom = 0
-    main_loss_numer = 0
-    main_loss_denom = 0
+    aux_loss_sum = 0
+    char_count = 0
+    main_loss_sum = 0
+    answer_count = 0
+    count1 = 0
+    count2 = 0
 
     labels = []
     scores = []
@@ -102,30 +105,40 @@ def evaluate(source):
         eff_history = args.seq_len - args.validseqlen
         final_output = output[:, eff_history:].contiguous().view(-1, n_characters)
         final_target = target[:, eff_history:].contiguous().view(-1)
-        answer = torch.eq(inp[:, eff_history:].contiguous().view(-1), idx_answer)
-        answerf = answer.float()
-        loss = eval_criterion(final_output, final_target)
 
-        aux_loss_numer += loss.sum().item()
-        aux_loss_denom += loss.size(0)
-        main_loss_numer += (loss * answerf).sum().item()
-        main_loss_denom += answerf.sum().item()
+        loss = criterion(final_output, final_target).detach().cpu().numpy()
+        answer = np.equal(inp[:, eff_history:].contiguous().view(-1).cpu().numpy(), idx_answer)
 
-        answer = answer.cpu().numpy()
-        labels.extend(np.equal(final_target.cpu().numpy()[answer], idx_one, dtype='int'))
-        scores.extend(final_output[:, idx_one].cpu().detach().numpy()[answer])
+        aux_loss_sum += loss.sum()
+        char_count += len(loss)
+        main_loss_sum += (loss * answer).sum()
+        answer_count += answer.sum()
 
-    aux_loss = aux_loss_numer / aux_loss_denom
-    main_loss = main_loss_numer / main_loss_denom
+        answer_val = np.equal(final_target.cpu().numpy()[answer], idx_one, dtype='int')
+        labels.extend(answer_val)
+        outprob = torch.nn.functional.softmax(final_output, dim=1)
+        scores.extend(outprob[:, idx_one].detach().cpu().numpy()[answer])
 
-    return aux_loss, main_loss, max_f1(labels, scores)
+        count1 += len(answer_val)
+        count2 += answer_val.sum()
+
+    aux_loss = aux_loss_sum / char_count
+    main_loss = main_loss_sum / char_count
+    answer_loss = main_loss_sum / answer_count
+
+    print(char_count, answer_count, count1, count2)
+    print(len(labels), np.quantile(labels, np.linspace(0.9, 1, 11)))
+    print(len(scores), ['%.2f' % x for x in np.quantile(scores, np.linspace(0.9, 1, 11))])
+
+    return aux_loss, main_loss, answer_loss, max_f1(labels, scores)
 
 
 def train(epoch):
     model.train()
     total_loss = 0
+    total_aux_loss = 0
+    total_main_loss = 0
     start_time = time.time()
-    losses = []
     source = train_data
     source_len = source.size(1)
     for batch_idx, i in enumerate(range(0, source_len - 1, args.validseqlen)):
@@ -137,71 +150,78 @@ def train(epoch):
         eff_history = args.seq_len - args.validseqlen
         final_output = output[:, eff_history:].contiguous().view(-1, n_characters)
         final_target = target[:, eff_history:].contiguous().view(-1)
-        loss = criterion(final_output, final_target)
+        element_loss = criterion(final_output, final_target)
+
+        answer = torch.eq(inp[:, eff_history:].contiguous().view(-1), idx_answer).float()
+        aux_loss = element_loss.mean()
+        main_loss = (answer * element_loss).mean()
+        loss = aux_loss + args.main * main_loss
         loss.backward()
 
         if args.clip > 0:
             torch.nn.utils.clip_grad_norm(model.parameters(), args.clip)
         optimizer.step()
-        total_loss += loss.data
+
+        total_loss += loss.data[0]
+        total_aux_loss += aux_loss.data[0]
+        total_main_loss += main_loss.data[0]
 
         if batch_idx % args.log_interval == 0 and batch_idx > 0:
-            cur_loss = total_loss[0] / args.log_interval
-            losses.append(cur_loss)
+            cur_loss = total_loss / args.log_interval
+            cur_aux_loss = total_aux_loss / args.log_interval
+            cur_main_loss = total_main_loss / args.log_interval
             elapsed = time.time() - start_time
-            print('| epoch {:3d} | {:5d}/{:5d} batches | lr {:02.5f} | ms/batch {:5.2f} | '
-                  'loss {:5.3f} | bpc {:5.3f}'.format(
+            print('| epoch {:3d} | {:5d}/{:5d} batches | lr {:5.1e} | ms/batch {:5.2f} | '
+                  'aux {:5.3f} | main {:5.3f} | loss {:5.3f}'.format(
                 epoch, batch_idx, int((source_len-0.5) / args.validseqlen), lr,
-                              elapsed * 1000 / args.log_interval, cur_loss, cur_loss / math.log(2)))
+                              elapsed * 1000 / args.log_interval,
+                              cur_aux_loss, cur_main_loss, cur_loss))
             total_loss = 0
+            total_aux_loss = 0
+            total_main_loss = 0
+
             start_time = time.time()
-
-        # if batch % (200 * args.log_interval) == 0 and batch > 0:
-        #     vloss = evaluate(val_data)
-        #     print('-' * 89)
-        #     print('| In epoch {:3d} | valid loss {:5.3f} | '
-        #           'valid bpc {:8.3f}'.format(epoch, vloss, vloss / math.log(2)))
-        #     model.train()
-
-    return sum(losses) * 1.0 / len(losses)
-
 
 def main():
     global lr
     try:
         print("Training for %d epochs..." % args.epochs)
         all_losses = []
-        best_vloss = 1e7
+        best_valid_loss = 1e7
         for epoch in range(1, args.epochs + 1):
-            loss = train(epoch)
+            train(epoch)
 
             print('-' * 89)
-            valid_aux_loss, valid_main_loss, f1 = evaluate(valid_data)
-            vloss = valid_aux_loss
-            print('| Epoch {:3d} | valid aux  loss {:5.3f} | bpc {:8.3f}'.format(
+            valid_aux_loss, valid_main_loss, valid_answer_loss, f1 = evaluate(valid_data)
+            valid_loss = valid_aux_loss + args.main * valid_main_loss
+            print('| epoch {:3d} | valid aux    loss {:5.3f} | bpc {:8.3f}'.format(
                 epoch, valid_aux_loss, valid_aux_loss / math.log(2)))
-            print('| Epoch {:3d} | valid main loss {:5.3f} | bpc {:8.3f} | F1 {:5.3f}'.format(
-                epoch, valid_main_loss, valid_main_loss / math.log(2), f1))
+            print('| epoch {:3d} | valid main   loss {:5.3f} | scaled {:5.3f} | comb loss {:5.3f}'.format(
+                epoch, valid_main_loss, valid_main_loss * args.main, valid_loss))
+            print('| epoch {:3d} | valid answer loss {:5.3f} | bpc {:8.3f} | F1 {:5.3f}'.format(
+                epoch, valid_answer_loss, valid_answer_loss / math.log(2), f1))
 
             print('-' * 89)
-            test_aux_loss, test_main_loss, f1 = evaluate(test_data)
-            test_loss = test_aux_loss
-            print('| Epoch {:3d} | test  aux  loss {:5.3f} | bpc {:8.3f}'.format(
+            test_aux_loss, test_main_loss, test_answer_loss, f1 = evaluate(test_data)
+            test_loss = test_aux_loss + args.main * test_main_loss
+            print('| epoch {:3d} | test  aux    loss {:5.3f} | bpc {:8.3f}'.format(
                 epoch, test_aux_loss, test_aux_loss / math.log(2)))
-            print('| Epoch {:3d} | test  main loss {:5.3f} | bpc {:8.3f} | F1 {:5.3f}'.format(
-                epoch, test_main_loss, test_main_loss / math.log(2), f1))
+            print('| epoch {:3d} | test  main   loss {:5.3f} | scaled {:5.3f} | comb loss {:5.3f}'.format(
+                epoch, test_main_loss, test_main_loss * args.main, test_loss))
+            print('| epoch {:3d} | test  answer loss {:5.3f} | bpc {:8.3f} | F1 {:5.3f}'.format(
+                epoch, test_answer_loss, test_answer_loss / math.log(2), f1))
             print('-' * 89)
 
-            if epoch > 5 and vloss > max(all_losses[-3:]):
+            if epoch > 5 and valid_loss > max(all_losses[-3:]):
                 lr = lr / 10.
                 for param_group in optimizer.param_groups:
                     param_group['lr'] = lr
-            all_losses.append(vloss)
+            all_losses.append(valid_loss)
 
-            if vloss < best_vloss:
+            if valid_loss < best_valid_loss:
                 print("Saving...")
                 save(model)
-                best_vloss = vloss
+                best_valid_loss = valid_loss
 
     except KeyboardInterrupt:
         print('-' * 89)
