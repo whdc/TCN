@@ -92,8 +92,8 @@ def evaluate(source):
     char_count = 0
     main_loss_sum = 0
     answer_count = 0
-    count1 = 0
-    count2 = 0
+    # count1 = 0
+    # count2 = 0
 
     labels = []
     scores = []
@@ -121,16 +121,16 @@ def evaluate(source):
         outprob = torch.nn.functional.softmax(final_output, dim=1)
         scores.extend(outprob[:, idx_one].detach().cpu().numpy()[answer])
 
-        count1 += len(answer_val)
-        count2 += answer_val.sum()
+        # count1 += len(answer_val)
+        # count2 += answer_val.sum()
 
     aux_loss = aux_loss_sum / char_count
     main_loss = main_loss_sum / char_count
     answer_loss = main_loss_sum / answer_count
 
-    print(char_count, answer_count, count1, count2)
-    print(len(labels), np.quantile(labels, np.linspace(0.9, 1, 11)))
-    print(len(scores), ['%.2f' % x for x in np.quantile(scores, np.linspace(0.9, 1, 11))])
+    # print(char_count, answer_count, count1, count2)
+    # print(len(labels), np.quantile(labels, np.linspace(0.9, 1, 11)))
+    # print(len(scores), ['%.2f' % x for x in np.quantile(scores, np.linspace(0.9, 1, 11))])
 
     return aux_loss, main_loss, answer_loss, max_f1(labels, scores)
 
