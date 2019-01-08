@@ -7,3 +7,4 @@ wikitext-103/
 __pycache__/
 quora-data/embeddings/
 *.csv
+notebooks/.ipynb_checkpoints
