@@ -71,10 +71,12 @@ def char_tensor(corpus, string):
     tensor = torch.zeros(len(string)).long()
     for i in range(len(string)):
         tensor[i] = corpus.dict.char2idx[string[i]]
-    return Variable(tensor).cuda(args.gpu) if cuda else Variable(tensor)
+    return tensor
 
 
 def batchify(data, batch_size, args):
+    data = Variable(data).cuda(args.gpu) if cuda else Variable(data)
+
     """The output should have size [L x batch_size], where L could be a long sequence length"""
     # Work out how cleanly we can divide the dataset into batch_size parts (i.e. continuous seqs).
     nbatch = data.size(0) // batch_size
