@@ -80,3 +80,101 @@ python char_cnn_test.py --dataset quora --levels 4 --ksize 5 --nhid 1000 --optim
 | Epoch  13 | test  main loss 0.149 | bpc    0.215 | F1 0.262
 -----------------------------------------------------------------------------------------
 ```
+
+## Jan 7, 2018
+
+```
+Train positions: 9632207
+Answer positions: 130614
+Yes answers: 8085
+```
+
+1000 hidden units and 10x boost for main loss:
+```
+python char_cnn_test.py --dataset quora --levels 4 --ksize 5 --nhid 1000 --optim='Adam' --lr 5e-4 --main 10 --gpu 1
+```
+This peaks after Epoch 11:
+```
+-----------------------------------------------------------------------------------------
+| epoch  11 | valid aux    loss 1.017 | bpc    1.467
+| epoch  11 | valid main   loss 0.002 | scaled 0.019 | comb loss 1.035
+| epoch  11 | valid answer loss 0.136 | bpc    0.197 | F1 0.582
+-----------------------------------------------------------------------------------------
+| epoch  11 | test  aux    loss 1.018 | bpc    1.469
+| epoch  11 | test  main   loss 0.002 | scaled 0.019 | comb loss 1.036
+| epoch  11 | test  answer loss 0.137 | bpc    0.198 | F1 0.574
+-----------------------------------------------------------------------------------------
+```
+Language model keeps improving after that, but main loss degrades:
+```
+-----------------------------------------------------------------------------------------
+| epoch  24 | valid aux    loss 0.990 | bpc    1.428
+| epoch  24 | valid main   loss 0.003 | scaled 0.025 | comb loss 1.015
+| epoch  24 | valid answer loss 0.186 | bpc    0.269 | F1 0.573
+-----------------------------------------------------------------------------------------
+| epoch  24 | test  aux    loss 0.991 | bpc    1.430
+| epoch  24 | test  main   loss 0.003 | scaled 0.025 | comb loss 1.017
+| epoch  24 | test  answer loss 0.188 | bpc    0.271 | F1 0.566
+-----------------------------------------------------------------------------------------
+```
+
+Go to 5 levels for bigger receptive field:
+```
+python char_cnn_test.py --dataset quora --levels 5 --ksize 4 --nhid 1000 --optim='Adam' --lr 1e-3 --main 10 --gpu 0 --seq_len 800 --validseqlen 640
+```
+Peaks after Epoch 9:
+```
+-----------------------------------------------------------------------------------------
+| epoch   9 | valid aux    loss 1.027 | bpc    1.482
+| epoch   9 | valid main   loss 0.002 | scaled 0.017 | comb loss 1.044
+| epoch   9 | valid answer loss 0.126 | bpc    0.181 | F1 0.610
+-----------------------------------------------------------------------------------------
+| epoch   9 | test  aux    loss 1.029 | bpc    1.484
+| epoch   9 | test  main   loss 0.002 | scaled 0.017 | comb loss 1.046
+| epoch   9 | test  answer loss 0.126 | bpc    0.182 | F1 0.604
+-----------------------------------------------------------------------------------------
+```
+Language model keeps improving after that:
+```
+-----------------------------------------------------------------------------------------
+| epoch  14 | valid aux    loss 1.012 | bpc    1.461
+| epoch  14 | valid main   loss 0.002 | scaled 0.019 | comb loss 1.031
+| epoch  14 | valid answer loss 0.136 | bpc    0.197 | F1 0.602
+-----------------------------------------------------------------------------------------
+| epoch  14 | test  aux    loss 1.014 | bpc    1.463
+| epoch  14 | test  main   loss 0.002 | scaled 0.019 | comb loss 1.033
+| epoch  14 | test  answer loss 0.137 | bpc    0.197 | F1 0.595
+-----------------------------------------------------------------------------------------
+```
+
+## Jan 8, 2018
+
+Try main loss boost of 5 rather than 10:
+```
+python char_cnn_test.py --dataset quora --levels 5 --ksize 4 --nhid 1000 --optim='Adam' --lr 1e-3 --main 5 --gpu 1 --seq_len 800 --validseqlen 640
+```
+[In progress]
+
+Try main loss boost of 2 rather than 10:
+```
+python char_cnn_test.py --dataset quora --levels 5 --ksize 4 --nhid 1000 --optim='Adam' --lr 1e-3 --main 2 --gpu 0 --seq_len 800 --validseqlen 640
+```
+This got as far as:
+```
+-----------------------------------------------------------------------------------------
+| epoch  12 | valid aux    loss 1.012 | bpc    1.461
+| epoch  12 | valid main   loss 0.002 | scaled 0.004 | comb loss 1.016
+| epoch  12 | valid answer loss 0.137 | bpc    0.198 | F1 0.542
+-----------------------------------------------------------------------------------------
+| epoch  12 | test  aux    loss 1.014 | bpc    1.463
+| epoch  12 | test  main   loss 0.002 | scaled 0.004 | comb loss 1.018
+| epoch  12 | test  answer loss 0.139 | bpc    0.201 | F1 0.528
+-----------------------------------------------------------------------------------------
+```
+I killed this because convergence was just too slow.
+
+Try shuffling Quora questions first:
+```
+python char_cnn_test.py --dataset quora-large --levels 5 --ksize 4 --nhid 1000 --optim='Adam' --lr 1e-3 --main 10 --gpu 0 --seq_len 800 --validseqlen 640
+```
+[In progress]

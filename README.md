@@ -1,6 +1,6 @@
 # TCN, co-opted for Quora Insincere Questions Kaggle Competition
 
-1. Copy Kaggle CSV files to `quora-data/` and run `cd quora-data; Rscript clean.r`. (Install R to run this script.)
+1. Copy Kaggle CSV files to `quora-data/` and run `cd quora-data; python for-char-cnn.py`
 
 2. In the Python env of your choice (I use conda) install Pytorch and Scipy (and other things I forget).
 
