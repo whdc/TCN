@@ -307,5 +307,201 @@ Language model keeps improving after that:
 
 ## Jan 9, 2018
 
+Try boosting main loss more, but no dice.
+```
+python char_cnn_test.py --dataset quora-large --levels 5 --ksize 4 --nhid 1000 --optim='Adam' --lr 1e-3 --main 20 --gpu 0 --seq_len 800 --validseqlen 640
+```
+Peaks fast:
+```
+-----------------------------------------------------------------------------------------
+| epoch   6 | valid aux    loss 1.055 | bpc    1.522
+| epoch   6 | valid main   loss 0.002 | scaled 0.034 | comb loss 1.089
+| epoch   6 | valid answer loss 0.127 | bpc    0.183 | F1 0.615
+-----------------------------------------------------------------------------------------
+| epoch   6 | test  aux    loss 1.056 | bpc    1.524
+| epoch   6 | test  main   loss 0.002 | scaled 0.034 | comb loss 1.090
+| epoch   6 | test  answer loss 0.126 | bpc    0.181 | F1 0.607
+-----------------------------------------------------------------------------------------
+```
+Then declines fast:
+```
+-----------------------------------------------------------------------------------------
+| epoch   9 | valid aux    loss 1.040 | bpc    1.501
+| epoch   9 | valid main   loss 0.002 | scaled 0.036 | comb loss 1.076
+| epoch   9 | valid answer loss 0.133 | bpc    0.191 | F1 0.600
+-----------------------------------------------------------------------------------------
+| epoch   9 | test  aux    loss 1.042 | bpc    1.503
+| epoch   9 | test  main   loss 0.002 | scaled 0.036 | comb loss 1.078
+| epoch   9 | test  answer loss 0.132 | bpc    0.191 | F1 0.593
+-----------------------------------------------------------------------------------------
+```
 
+Try another architecture, where the label is a constant-value sequence parallel to the input.
+```
+python train.py --dataset quora-large --levels 5 --ksize 4 --nhid 1000 --optim='Adam' --lr 1e-3 --main 1 --gpu 1 --seq_len 800 --validseqlen 640
+
+-----------------------------------------------------------------------------------------
+| epoch   1 | valid aux    loss 1.280 | bpc    1.847
+| epoch   1 | valid main   loss 0.201 | scaled 0.201 | comb loss 1.481
+| epoch   1 | valid answer loss 0.149 | bpc    0.215 | F1 0.535
+-----------------------------------------------------------------------------------------
+| epoch   1 | test  aux    loss 1.282 | bpc    1.849
+| epoch   1 | test  main   loss 0.200 | scaled 0.200 | comb loss 1.482
+| epoch   1 | test  answer loss 0.148 | bpc    0.213 | F1 0.527
+-----------------------------------------------------------------------------------------
+
+-----------------------------------------------------------------------------------------
+| epoch   2 | valid aux    loss 1.189 | bpc    1.716
+| epoch   2 | valid main   loss 0.187 | scaled 0.187 | comb loss 1.376
+| epoch   2 | valid answer loss 0.132 | bpc    0.191 | F1 0.582
+-----------------------------------------------------------------------------------------
+| epoch   2 | test  aux    loss 1.191 | bpc    1.718
+| epoch   2 | test  main   loss 0.186 | scaled 0.186 | comb loss 1.377
+| epoch   2 | test  answer loss 0.131 | bpc    0.189 | F1 0.567
+-----------------------------------------------------------------------------------------
+
+-----------------------------------------------------------------------------------------
+| epoch   3 | valid aux    loss 1.152 | bpc    1.663
+| epoch   3 | valid main   loss 0.187 | scaled 0.187 | comb loss 1.339
+| epoch   3 | valid answer loss 0.132 | bpc    0.190 | F1 0.597
+-----------------------------------------------------------------------------------------
+| epoch   3 | test  aux    loss 1.154 | bpc    1.665
+| epoch   3 | test  main   loss 0.185 | scaled 0.185 | comb loss 1.339
+| epoch   3 | test  answer loss 0.129 | bpc    0.187 | F1 0.586
+-----------------------------------------------------------------------------------------
+```
+Peaks, I think:
+```
+-----------------------------------------------------------------------------------------
+| epoch  12 | valid aux    loss 1.074 | bpc    1.550
+| epoch  12 | valid main   loss 0.187 | scaled 0.187 | comb loss 1.261
+| epoch  12 | valid answer loss 0.125 | bpc    0.181 | F1 0.625
+-----------------------------------------------------------------------------------------
+| epoch  12 | test  aux    loss 1.076 | bpc    1.553
+| epoch  12 | test  main   loss 0.186 | scaled 0.186 | comb loss 1.262
+| epoch  12 | test  answer loss 0.123 | bpc    0.177 | F1 0.623
+-----------------------------------------------------------------------------------------
+```
+Then degrades slowly:
+```
+-----------------------------------------------------------------------------------------
+| epoch  16 | valid aux    loss 1.066 | bpc    1.538
+| epoch  16 | valid main   loss 0.185 | scaled 0.185 | comb loss 1.251
+| epoch  16 | valid answer loss 0.123 | bpc    0.178 | F1 0.624
+-----------------------------------------------------------------------------------------
+| epoch  16 | test  aux    loss 1.068 | bpc    1.541
+| epoch  16 | test  main   loss 0.184 | scaled 0.184 | comb loss 1.252
+| epoch  16 | test  answer loss 0.121 | bpc    0.175 | F1 0.620
+-----------------------------------------------------------------------------------------
+```
+I didn't let it go to long because it became obvious that the priming sequence had to be longer.
+
+Here I try a longer sequence, but still without understanding exactly how to compute the
+receptive field length:
+```
+python train.py --dataset quora-large --levels 6 --ksize 3 --nhid 1000 --optim='Adam' --lr 1e-3 --main 1 --gpu 0 --seq_len 1600 --validseqlen 1200 --batch_size 16
+
+-----------------------------------------------------------------------------------------
+| epoch   1 | valid aux    loss 1.268 | bpc    1.829
+| epoch   1 | valid main   loss 0.195 | scaled 0.195 | comb loss 1.463
+| epoch   1 | valid answer loss 0.141 | bpc    0.203 | F1 0.552
+-----------------------------------------------------------------------------------------
+| epoch   1 | test  aux    loss 1.270 | bpc    1.832
+| epoch   1 | test  main   loss 0.193 | scaled 0.193 | comb loss 1.463
+| epoch   1 | test  answer loss 0.139 | bpc    0.201 | F1 0.545
+-----------------------------------------------------------------------------------------
+
+-----------------------------------------------------------------------------------------
+| epoch   2 | valid aux    loss 1.188 | bpc    1.714
+| epoch   2 | valid main   loss 0.186 | scaled 0.186 | comb loss 1.374
+| epoch   2 | valid answer loss 0.130 | bpc    0.188 | F1 0.591
+-----------------------------------------------------------------------------------------
+| epoch   2 | test  aux    loss 1.190 | bpc    1.716
+| epoch   2 | test  main   loss 0.185 | scaled 0.185 | comb loss 1.375
+| epoch   2 | test  answer loss 0.129 | bpc    0.186 | F1 0.578
+-----------------------------------------------------------------------------------------
+
+-----------------------------------------------------------------------------------------
+| epoch   3 | valid aux    loss 1.152 | bpc    1.661
+| epoch   3 | valid main   loss 0.182 | scaled 0.182 | comb loss 1.334
+| epoch   3 | valid answer loss 0.125 | bpc    0.180 | F1 0.609
+-----------------------------------------------------------------------------------------
+| epoch   3 | test  aux    loss 1.153 | bpc    1.664
+| epoch   3 | test  main   loss 0.181 | scaled 0.181 | comb loss 1.334
+| epoch   3 | test  answer loss 0.124 | bpc    0.178 | F1 0.594
+-----------------------------------------------------------------------------------------
+```
+Peaks:
+```
+-----------------------------------------------------------------------------------------
+| epoch  13 | valid aux    loss 1.068 | bpc    1.541
+| epoch  13 | valid main   loss 0.176 | scaled 0.176 | comb loss 1.245
+| epoch  13 | valid answer loss 0.114 | bpc    0.165 | F1 0.638
+-----------------------------------------------------------------------------------------
+| epoch  13 | test  aux    loss 1.070 | bpc    1.544
+| epoch  13 | test  main   loss 0.176 | scaled 0.176 | comb loss 1.245
+| epoch  13 | test  answer loss 0.113 | bpc    0.163 | F1 0.631
+-----------------------------------------------------------------------------------------
+```
+[Still running]
+
+If `n` is the number of layers and `k` is the filter size, then receptive field size is
+`1 + 2 * (k - 1) * (2^(n + 1) - 1)`.
+
+After figuring this out, I make sure the priming sequence was larger than the receptive field
+(for the first time) and also tried a new dropout rate and main loss boost.
+```
+python train.py --dataset quora-large --levels 5 --ksize 3 --nhid 1000 --optim='Adam' --lr 1e-3 --main 2 --gpu 1 --seq_len 1600 --validseqlen 1340 --dropout 0.15 --batch_size 16
+
+-----------------------------------------------------------------------------------------
+| epoch   1 | valid aux    loss 1.328 | bpc    1.916
+| epoch   1 | valid main   loss 0.196 | scaled 0.393 | comb loss 1.721
+| epoch   1 | valid answer loss 0.142 | bpc    0.205 | F1 0.544
+-----------------------------------------------------------------------------------------
+| epoch   1 | test  aux    loss 1.329 | bpc    1.918
+| epoch   1 | test  main   loss 0.196 | scaled 0.391 | comb loss 1.720
+| epoch   1 | test  answer loss 0.141 | bpc    0.203 | F1 0.536
+-----------------------------------------------------------------------------------------
+
+-----------------------------------------------------------------------------------------
+| epoch   2 | valid aux    loss 1.228 | bpc    1.772
+| epoch   2 | valid main   loss 0.188 | scaled 0.376 | comb loss 1.605
+| epoch   2 | valid answer loss 0.132 | bpc    0.190 | F1 0.577
+-----------------------------------------------------------------------------------------
+| epoch   2 | test  aux    loss 1.230 | bpc    1.774
+| epoch   2 | test  main   loss 0.187 | scaled 0.373 | comb loss 1.603
+| epoch   2 | test  answer loss 0.130 | bpc    0.188 | F1 0.567
+-----------------------------------------------------------------------------------------
+
+-----------------------------------------------------------------------------------------
+| epoch   3 | valid aux    loss 1.187 | bpc    1.712
+| epoch   3 | valid main   loss 0.187 | scaled 0.374 | comb loss 1.560
+| epoch   3 | valid answer loss 0.128 | bpc    0.185 | F1 0.589
+-----------------------------------------------------------------------------------------
+| epoch   3 | test  aux    loss 1.188 | bpc    1.714
+| epoch   3 | test  main   loss 0.185 | scaled 0.370 | comb loss 1.558
+| epoch   3 | test  answer loss 0.127 | bpc    0.183 | F1 0.581
+-----------------------------------------------------------------------------------------
+```
+I let it go as far as:
+```
+-----------------------------------------------------------------------------------------
+| epoch  11 | valid aux    loss 1.110 | bpc    1.601
+| epoch  11 | valid main   loss 0.181 | scaled 0.362 | comb loss 1.472
+| epoch  11 | valid answer loss 0.120 | bpc    0.173 | F1 0.619
+-----------------------------------------------------------------------------------------
+| epoch  11 | test  aux    loss 1.112 | bpc    1.604
+| epoch  11 | test  main   loss 0.180 | scaled 0.360 | comb loss 1.472
+| epoch  11 | test  answer loss 0.119 | bpc    0.171 | F1 0.612
+-----------------------------------------------------------------------------------------
+```
+Then I killed it because it's obvious that the dropout rate was too high.
+
+## Jan 10
+
+I tried the same run with lower dropout:
+```
+python train.py --dataset quora-large --levels 5 --ksize 3 --nhid 1000 --optim='Adam' --lr 1e-3 --main 2 --gpu 1 --seq_len 1600 --validseqlen 1340 --dropout 0.1 --batch_size 16
+```
+[Still running]
 
