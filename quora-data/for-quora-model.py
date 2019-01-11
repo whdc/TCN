@@ -1,4 +1,5 @@
 import os
+import numpy as np
 import pandas as pd
 
 outpath1 = '../TCN/quora/data/quora-large'
@@ -26,6 +27,9 @@ def write_strings(df, fname):
 
   with open(fname + '-a.txt', 'w') as fo:
     fo.write(astr)
+
+# Show string lengths.
+print(np.percentile(df['question_text'].str.len().values, [0, 1, 2, 5, 10, 25, 50, 75, 90, 95, 98, 99, 100]))
 
 # Partition and create large dataset.
 n3 = len(df)

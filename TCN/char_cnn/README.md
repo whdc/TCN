@@ -397,7 +397,7 @@ Then degrades slowly:
 I didn't let it go to long because it became obvious that the priming sequence had to be longer.
 
 Here I try a longer sequence, but still without understanding exactly how to compute the
-receptive field length:
+receptive field size:
 ```
 python train.py --dataset quora-large --levels 6 --ksize 3 --nhid 1000 --optim='Adam' --lr 1e-3 --main 1 --gpu 0 --seq_len 1600 --validseqlen 1200 --batch_size 16
 
@@ -443,7 +443,56 @@ Peaks:
 | epoch  13 | test  answer loss 0.113 | bpc    0.163 | F1 0.631
 -----------------------------------------------------------------------------------------
 ```
-[Still running]
+I stopped it here:
+```
+| epoch  20 |   100/ 3900 batches | lr 1.0e-03 | ms/batch 742.28 | aux 1.108 | main 0.163 | loss 1.271
+| epoch  20 |   200/ 3900 batches | lr 1.0e-03 | ms/batch 735.91 | aux 1.096 | main 0.160 | loss 1.256
+| epoch  20 |   300/ 3900 batches | lr 1.0e-03 | ms/batch 733.75 | aux 1.099 | main 0.153 | loss 1.252
+| epoch  20 |   400/ 3900 batches | lr 1.0e-03 | ms/batch 734.90 | aux 1.094 | main 0.163 | loss 1.257
+| epoch  20 |   500/ 3900 batches | lr 1.0e-03 | ms/batch 733.30 | aux 1.095 | main 0.158 | loss 1.253
+| epoch  20 |   600/ 3900 batches | lr 1.0e-03 | ms/batch 732.09 | aux 1.098 | main 0.172 | loss 1.270
+| epoch  20 |   700/ 3900 batches | lr 1.0e-03 | ms/batch 734.82 | aux 1.098 | main 0.162 | loss 1.260
+| epoch  20 |   800/ 3900 batches | lr 1.0e-03 | ms/batch 734.60 | aux 1.095 | main 0.163 | loss 1.259
+| epoch  20 |   900/ 3900 batches | lr 1.0e-03 | ms/batch 732.97 | aux 1.095 | main 0.166 | loss 1.261
+| epoch  20 |  1000/ 3900 batches | lr 1.0e-03 | ms/batch 732.92 | aux 1.097 | main 0.163 | loss 1.260
+| epoch  20 |  1100/ 3900 batches | lr 1.0e-03 | ms/batch 736.60 | aux 1.097 | main 0.163 | loss 1.260
+| epoch  20 |  1200/ 3900 batches | lr 1.0e-03 | ms/batch 733.08 | aux 1.096 | main 0.161 | loss 1.257
+| epoch  20 |  1300/ 3900 batches | lr 1.0e-03 | ms/batch 734.25 | aux 1.096 | main 0.157 | loss 1.253
+| epoch  20 |  1400/ 3900 batches | lr 1.0e-03 | ms/batch 734.73 | aux 1.097 | main 0.169 | loss 1.266
+| epoch  20 |  1500/ 3900 batches | lr 1.0e-03 | ms/batch 733.09 | aux 1.098 | main 0.163 | loss 1.261
+| epoch  20 |  1600/ 3900 batches | lr 1.0e-03 | ms/batch 732.42 | aux 1.096 | main 0.158 | loss 1.254
+| epoch  20 |  1700/ 3900 batches | lr 1.0e-03 | ms/batch 734.79 | aux 1.096 | main 0.159 | loss 1.256
+| epoch  20 |  1800/ 3900 batches | lr 1.0e-03 | ms/batch 733.05 | aux 1.099 | main 0.162 | loss 1.261
+| epoch  20 |  1900/ 3900 batches | lr 1.0e-03 | ms/batch 734.08 | aux 1.093 | main 0.169 | loss 1.262
+| epoch  20 |  2000/ 3900 batches | lr 1.0e-03 | ms/batch 734.87 | aux 1.089 | main 0.157 | loss 1.247
+| epoch  20 |  2100/ 3900 batches | lr 1.0e-03 | ms/batch 733.08 | aux 1.097 | main 0.158 | loss 1.255
+| epoch  20 |  2200/ 3900 batches | lr 1.0e-03 | ms/batch 733.49 | aux 1.098 | main 0.164 | loss 1.262
+| epoch  20 |  2300/ 3900 batches | lr 1.0e-03 | ms/batch 733.28 | aux 1.093 | main 0.163 | loss 1.256
+| epoch  20 |  2400/ 3900 batches | lr 1.0e-03 | ms/batch 736.52 | aux 1.097 | main 0.155 | loss 1.251
+| epoch  20 |  2500/ 3900 batches | lr 1.0e-03 | ms/batch 731.98 | aux 1.096 | main 0.160 | loss 1.256
+| epoch  20 |  2600/ 3900 batches | lr 1.0e-03 | ms/batch 733.13 | aux 1.098 | main 0.170 | loss 1.268
+| epoch  20 |  2700/ 3900 batches | lr 1.0e-03 | ms/batch 733.13 | aux 1.093 | main 0.159 | loss 1.252
+| epoch  20 |  2800/ 3900 batches | lr 1.0e-03 | ms/batch 733.09 | aux 1.099 | main 0.162 | loss 1.261
+| epoch  20 |  2900/ 3900 batches | lr 1.0e-03 | ms/batch 731.99 | aux 1.094 | main 0.155 | loss 1.249
+| epoch  20 |  3000/ 3900 batches | lr 1.0e-03 | ms/batch 732.62 | aux 1.094 | main 0.164 | loss 1.258
+| epoch  20 |  3100/ 3900 batches | lr 1.0e-03 | ms/batch 733.58 | aux 1.096 | main 0.162 | loss 1.258
+| epoch  20 |  3200/ 3900 batches | lr 1.0e-03 | ms/batch 735.05 | aux 1.092 | main 0.162 | loss 1.255
+| epoch  20 |  3300/ 3900 batches | lr 1.0e-03 | ms/batch 733.87 | aux 1.095 | main 0.165 | loss 1.261
+| epoch  20 |  3400/ 3900 batches | lr 1.0e-03 | ms/batch 734.23 | aux 1.094 | main 0.154 | loss 1.248
+| epoch  20 |  3500/ 3900 batches | lr 1.0e-03 | ms/batch 734.49 | aux 1.095 | main 0.159 | loss 1.254
+| epoch  20 |  3600/ 3900 batches | lr 1.0e-03 | ms/batch 733.88 | aux 1.093 | main 0.161 | loss 1.254
+| epoch  20 |  3700/ 3900 batches | lr 1.0e-03 | ms/batch 733.95 | aux 1.094 | main 0.163 | loss 1.257
+| epoch  20 |  3800/ 3900 batches | lr 1.0e-03 | ms/batch 735.86 | aux 1.098 | main 0.171 | loss 1.269
+-----------------------------------------------------------------------------------------
+| epoch  20 | valid aux    loss 1.054 | bpc    1.520
+| epoch  20 | valid main   loss 0.180 | scaled 0.180 | comb loss 1.234
+| epoch  20 | valid answer loss 0.115 | bpc    0.167 | F1 0.635
+-----------------------------------------------------------------------------------------
+| epoch  20 | test  aux    loss 1.056 | bpc    1.523
+| epoch  20 | test  main   loss 0.180 | scaled 0.180 | comb loss 1.236
+| epoch  20 | test  answer loss 0.115 | bpc    0.166 | F1 0.627
+-----------------------------------------------------------------------------------------
+```
 
 If `n` is the number of layers and `k` is the filter size, then receptive field size is
 `1 + 2 * (k - 1) * (2^(n + 1) - 1)`.
@@ -503,5 +552,246 @@ I tried the same run with lower dropout:
 ```
 python train.py --dataset quora-large --levels 5 --ksize 3 --nhid 1000 --optim='Adam' --lr 1e-3 --main 2 --gpu 1 --seq_len 1600 --validseqlen 1340 --dropout 0.1 --batch_size 16
 ```
-[Still running]
+Peaked:
+```
+| epoch  10 |   100/ 3492 batches | lr 1.0e-03 | ms/batch 561.60 | aux 1.167 | main 0.172 | loss 1.512
+| epoch  10 |   200/ 3492 batches | lr 1.0e-03 | ms/batch 556.12 | aux 1.156 | main 0.171 | loss 1.498
+| epoch  10 |   300/ 3492 batches | lr 1.0e-03 | ms/batch 556.07 | aux 1.158 | main 0.169 | loss 1.495
+| epoch  10 |   400/ 3492 batches | lr 1.0e-03 | ms/batch 556.10 | aux 1.155 | main 0.172 | loss 1.500
+| epoch  10 |   500/ 3492 batches | lr 1.0e-03 | ms/batch 556.21 | aux 1.154 | main 0.177 | loss 1.508
+| epoch  10 |   600/ 3492 batches | lr 1.0e-03 | ms/batch 556.09 | aux 1.158 | main 0.176 | loss 1.510
+| epoch  10 |   700/ 3492 batches | lr 1.0e-03 | ms/batch 556.00 | aux 1.157 | main 0.175 | loss 1.507
+| epoch  10 |   800/ 3492 batches | lr 1.0e-03 | ms/batch 556.16 | aux 1.155 | main 0.172 | loss 1.499
+| epoch  10 |   900/ 3492 batches | lr 1.0e-03 | ms/batch 556.21 | aux 1.153 | main 0.174 | loss 1.501
+| epoch  10 |  1000/ 3492 batches | lr 1.0e-03 | ms/batch 556.07 | aux 1.157 | main 0.168 | loss 1.493
+| epoch  10 |  1100/ 3492 batches | lr 1.0e-03 | ms/batch 556.10 | aux 1.153 | main 0.172 | loss 1.497
+| epoch  10 |  1200/ 3492 batches | lr 1.0e-03 | ms/batch 556.15 | aux 1.156 | main 0.175 | loss 1.507
+| epoch  10 |  1300/ 3492 batches | lr 1.0e-03 | ms/batch 556.15 | aux 1.156 | main 0.171 | loss 1.498
+| epoch  10 |  1400/ 3492 batches | lr 1.0e-03 | ms/batch 556.37 | aux 1.156 | main 0.172 | loss 1.500
+| epoch  10 |  1500/ 3492 batches | lr 1.0e-03 | ms/batch 556.43 | aux 1.155 | main 0.169 | loss 1.493
+| epoch  10 |  1600/ 3492 batches | lr 1.0e-03 | ms/batch 556.32 | aux 1.157 | main 0.171 | loss 1.500
+| epoch  10 |  1700/ 3492 batches | lr 1.0e-03 | ms/batch 556.27 | aux 1.152 | main 0.179 | loss 1.510
+| epoch  10 |  1800/ 3492 batches | lr 1.0e-03 | ms/batch 556.23 | aux 1.148 | main 0.169 | loss 1.486
+| epoch  10 |  1900/ 3492 batches | lr 1.0e-03 | ms/batch 556.26 | aux 1.155 | main 0.175 | loss 1.504
+| epoch  10 |  2000/ 3492 batches | lr 1.0e-03 | ms/batch 556.21 | aux 1.152 | main 0.176 | loss 1.504
+| epoch  10 |  2100/ 3492 batches | lr 1.0e-03 | ms/batch 556.04 | aux 1.154 | main 0.168 | loss 1.489
+| epoch  10 |  2200/ 3492 batches | lr 1.0e-03 | ms/batch 556.08 | aux 1.154 | main 0.170 | loss 1.494
+| epoch  10 |  2300/ 3492 batches | lr 1.0e-03 | ms/batch 555.99 | aux 1.154 | main 0.182 | loss 1.519
+| epoch  10 |  2400/ 3492 batches | lr 1.0e-03 | ms/batch 555.86 | aux 1.154 | main 0.171 | loss 1.496
+| epoch  10 |  2500/ 3492 batches | lr 1.0e-03 | ms/batch 556.08 | aux 1.156 | main 0.166 | loss 1.488
+| epoch  10 |  2600/ 3492 batches | lr 1.0e-03 | ms/batch 556.10 | aux 1.154 | main 0.167 | loss 1.487
+| epoch  10 |  2700/ 3492 batches | lr 1.0e-03 | ms/batch 556.22 | aux 1.153 | main 0.171 | loss 1.495
+| epoch  10 |  2800/ 3492 batches | lr 1.0e-03 | ms/batch 556.34 | aux 1.153 | main 0.170 | loss 1.492
+| epoch  10 |  2900/ 3492 batches | lr 1.0e-03 | ms/batch 556.37 | aux 1.152 | main 0.179 | loss 1.510
+| epoch  10 |  3000/ 3492 batches | lr 1.0e-03 | ms/batch 556.15 | aux 1.152 | main 0.169 | loss 1.490
+| epoch  10 |  3100/ 3492 batches | lr 1.0e-03 | ms/batch 556.42 | aux 1.152 | main 0.174 | loss 1.500
+| epoch  10 |  3200/ 3492 batches | lr 1.0e-03 | ms/batch 556.33 | aux 1.147 | main 0.169 | loss 1.485
+| epoch  10 |  3300/ 3492 batches | lr 1.0e-03 | ms/batch 556.40 | aux 1.151 | main 0.172 | loss 1.495
+| epoch  10 |  3400/ 3492 batches | lr 1.0e-03 | ms/batch 556.38 | aux 1.156 | main 0.183 | loss 1.521
+-----------------------------------------------------------------------------------------
+| epoch  10 | valid aux    loss 1.104 | bpc    1.592
+| epoch  10 | valid main   loss 0.179 | scaled 0.358 | comb loss 1.462
+| epoch  10 | valid answer loss 0.120 | bpc    0.173 | F1 0.618
+-----------------------------------------------------------------------------------------
+| epoch  10 | test  aux    loss 1.105 | bpc    1.595
+| epoch  10 | test  main   loss 0.179 | scaled 0.357 | comb loss 1.463
+| epoch  10 | test  answer loss 0.119 | bpc    0.172 | F1 0.610
+-----------------------------------------------------------------------------------------
+```
+I stopped it here.
+```
+| epoch  13 |   100/ 3492 batches | lr 1.0e-03 | ms/batch 561.00 | aux 1.157 | main 0.167 | loss 1.491
+| epoch  13 |   200/ 3492 batches | lr 1.0e-03 | ms/batch 555.69 | aux 1.145 | main 0.167 | loss 1.480
+| epoch  13 |   300/ 3492 batches | lr 1.0e-03 | ms/batch 555.66 | aux 1.147 | main 0.163 | loss 1.472
+| epoch  13 |   400/ 3492 batches | lr 1.0e-03 | ms/batch 555.52 | aux 1.142 | main 0.168 | loss 1.478
+| epoch  13 |   500/ 3492 batches | lr 1.0e-03 | ms/batch 555.49 | aux 1.141 | main 0.172 | loss 1.484
+| epoch  13 |   600/ 3492 batches | lr 1.0e-03 | ms/batch 555.30 | aux 1.146 | main 0.175 | loss 1.496
+| epoch  13 |   700/ 3492 batches | lr 1.0e-03 | ms/batch 555.23 | aux 1.144 | main 0.169 | loss 1.482
+| epoch  13 |   800/ 3492 batches | lr 1.0e-03 | ms/batch 555.27 | aux 1.143 | main 0.166 | loss 1.475
+| epoch  13 |   900/ 3492 batches | lr 1.0e-03 | ms/batch 555.36 | aux 1.144 | main 0.170 | loss 1.483
+| epoch  13 |  1000/ 3492 batches | lr 1.0e-03 | ms/batch 555.38 | aux 1.146 | main 0.164 | loss 1.473
+| epoch  13 |  1100/ 3492 batches | lr 1.0e-03 | ms/batch 555.45 | aux 1.142 | main 0.168 | loss 1.479
+| epoch  13 |  1200/ 3492 batches | lr 1.0e-03 | ms/batch 555.67 | aux 1.146 | main 0.172 | loss 1.489
+| epoch  13 |  1300/ 3492 batches | lr 1.0e-03 | ms/batch 555.63 | aux 1.146 | main 0.168 | loss 1.482
+| epoch  13 |  1400/ 3492 batches | lr 1.0e-03 | ms/batch 555.72 | aux 1.144 | main 0.168 | loss 1.481
+| epoch  13 |  1500/ 3492 batches | lr 1.0e-03 | ms/batch 555.49 | aux 1.144 | main 0.164 | loss 1.471
+| epoch  13 |  1600/ 3492 batches | lr 1.0e-03 | ms/batch 555.57 | aux 1.147 | main 0.169 | loss 1.484
+| epoch  13 |  1700/ 3492 batches | lr 1.0e-03 | ms/batch 555.84 | aux 1.142 | main 0.173 | loss 1.488
+| epoch  13 |  1800/ 3492 batches | lr 1.0e-03 | ms/batch 555.68 | aux 1.138 | main 0.164 | loss 1.465
+| epoch  13 |  1900/ 3492 batches | lr 1.0e-03 | ms/batch 555.76 | aux 1.146 | main 0.168 | loss 1.482
+| epoch  13 |  2000/ 3492 batches | lr 1.0e-03 | ms/batch 555.49 | aux 1.140 | main 0.172 | loss 1.485
+| epoch  13 |  2100/ 3492 batches | lr 1.0e-03 | ms/batch 555.49 | aux 1.144 | main 0.170 | loss 1.483
+| epoch  13 |  2200/ 3492 batches | lr 1.0e-03 | ms/batch 555.59 | aux 1.142 | main 0.165 | loss 1.473
+| epoch  13 |  2300/ 3492 batches | lr 1.0e-03 | ms/batch 555.43 | aux 1.143 | main 0.175 | loss 1.494
+| epoch  13 |  2400/ 3492 batches | lr 1.0e-03 | ms/batch 555.36 | aux 1.142 | main 0.166 | loss 1.473
+| epoch  13 |  2500/ 3492 batches | lr 1.0e-03 | ms/batch 555.55 | aux 1.144 | main 0.163 | loss 1.470
+| epoch  13 |  2600/ 3492 batches | lr 1.0e-03 | ms/batch 555.33 | aux 1.142 | main 0.162 | loss 1.466
+| epoch  13 |  2700/ 3492 batches | lr 1.0e-03 | ms/batch 555.42 | aux 1.141 | main 0.166 | loss 1.473
+| epoch  13 |  2800/ 3492 batches | lr 1.0e-03 | ms/batch 555.38 | aux 1.142 | main 0.165 | loss 1.472
+| epoch  13 |  2900/ 3492 batches | lr 1.0e-03 | ms/batch 555.26 | aux 1.142 | main 0.174 | loss 1.490
+| epoch  13 |  3000/ 3492 batches | lr 1.0e-03 | ms/batch 555.39 | aux 1.142 | main 0.164 | loss 1.470
+| epoch  13 |  3100/ 3492 batches | lr 1.0e-03 | ms/batch 555.20 | aux 1.142 | main 0.168 | loss 1.478
+| epoch  13 |  3200/ 3492 batches | lr 1.0e-03 | ms/batch 555.33 | aux 1.138 | main 0.166 | loss 1.470
+| epoch  13 |  3300/ 3492 batches | lr 1.0e-03 | ms/batch 555.41 | aux 1.140 | main 0.166 | loss 1.473
+| epoch  13 |  3400/ 3492 batches | lr 1.0e-03 | ms/batch 555.42 | aux 1.145 | main 0.185 | loss 1.514
+-----------------------------------------------------------------------------------------
+| epoch  13 | valid aux    loss 1.094 | bpc    1.579
+| epoch  13 | valid main   loss 0.183 | scaled 0.366 | comb loss 1.460
+| epoch  13 | valid answer loss 0.122 | bpc    0.175 | F1 0.619
+-----------------------------------------------------------------------------------------
+| epoch  13 | test  aux    loss 1.096 | bpc    1.581
+| epoch  13 | test  main   loss 0.183 | scaled 0.365 | comb loss 1.461
+| epoch  13 | test  answer loss 0.121 | bpc    0.175 | F1 0.608
+-----------------------------------------------------------------------------------------
+```
+The train loss just doesn't get low enough.
+
+What about less dropout?
+```
+python train.py --dataset quora-large --levels 5 --ksize 3 --nhid 1000 --optim='Adam' --lr 1e-3 --main 1 --gpu 0 --seq_len 1600 --validseqlen 1340 --dropout 0.05 --batch_size 16
+```
+Also not so great. Peaked:
+```
+-----------------------------------------------------------------------------------------
+| epoch  10 | valid aux    loss 1.073 | bpc    1.548
+| epoch  10 | valid main   loss 0.178 | scaled 0.178 | comb loss 1.251
+| epoch  10 | valid answer loss 0.119 | bpc    0.172 | F1 0.614
+-----------------------------------------------------------------------------------------
+| epoch  10 | test  aux    loss 1.075 | bpc    1.551
+| epoch  10 | test  main   loss 0.177 | scaled 0.177 | comb loss 1.252
+| epoch  10 | test  answer loss 0.118 | bpc    0.170 | F1 0.607
+-----------------------------------------------------------------------------------------
+```
+Then:
+```
+-----------------------------------------------------------------------------------------
+| epoch  11 | valid aux    loss 1.070 | bpc    1.543
+| epoch  11 | valid main   loss 0.183 | scaled 0.183 | comb loss 1.253
+| epoch  11 | valid answer loss 0.128 | bpc    0.185 | F1 0.610
+-----------------------------------------------------------------------------------------
+| epoch  11 | test  aux    loss 1.071 | bpc    1.546
+| epoch  11 | test  main   loss 0.183 | scaled 0.183 | comb loss 1.254
+| epoch  11 | test  answer loss 0.127 | bpc    0.184 | F1 0.604
+-----------------------------------------------------------------------------------------
+```
+
+Okay how about more hidden states?
+```
+python train.py --dataset quora-large --levels 5 --ksize 3 --nhid 1400 --optim='Adam' --lr 1e-3 --main 2 --gpu 1 --seq_len 1600 --validseqlen 1340 --dropout 0.1 --batch_size 16
+
+-----------------------------------------------------------------------------------------
+| epoch   1 | valid aux    loss 1.300 | bpc    1.876
+| epoch   1 | valid main   loss 0.206 | scaled 0.413 | comb loss 1.713
+| epoch   1 | valid answer loss 0.154 | bpc    0.222 | F1 0.545
+-----------------------------------------------------------------------------------------
+| epoch   1 | test  aux    loss 1.302 | bpc    1.878
+| epoch   1 | test  main   loss 0.205 | scaled 0.409 | comb loss 1.711
+| epoch   1 | test  answer loss 0.152 | bpc    0.219 | F1 0.537
+-----------------------------------------------------------------------------------------
+
+-----------------------------------------------------------------------------------------
+| epoch   2 | valid aux    loss 1.202 | bpc    1.734
+| epoch   2 | valid main   loss 0.191 | scaled 0.383 | comb loss 1.585
+| epoch   2 | valid answer loss 0.134 | bpc    0.193 | F1 0.578
+-----------------------------------------------------------------------------------------
+| epoch   2 | test  aux    loss 1.203 | bpc    1.736
+| epoch   2 | test  main   loss 0.190 | scaled 0.379 | comb loss 1.583
+| epoch   2 | test  answer loss 0.132 | bpc    0.190 | F1 0.567
+-----------------------------------------------------------------------------------------
+
+-----------------------------------------------------------------------------------------
+| epoch   3 | valid aux    loss 1.162 | bpc    1.677
+| epoch   3 | valid main   loss 0.184 | scaled 0.368 | comb loss 1.530
+| epoch   3 | valid answer loss 0.126 | bpc    0.182 | F1 0.596
+-----------------------------------------------------------------------------------------
+| epoch   3 | test  aux    loss 1.164 | bpc    1.679
+| epoch   3 | test  main   loss 0.183 | scaled 0.365 | comb loss 1.529
+| epoch   3 | test  answer loss 0.125 | bpc    0.180 | F1 0.588
+-----------------------------------------------------------------------------------------
+```
+It runs really slow and is suprisingly lame so far.
+
+What about just using main loss?
+```
+python train.py --dataset quora-large --levels 5 --ksize 3 --nhid 300 --optim='Adam' --lr 1e-3 --aux 0.01 --main 1 --gpu 0 --seq_len 1600 --validseqlen 1340 --dropout 0.05 --batch_size 16
+```
+Peaking:
+```
+| epoch  18 |   100/ 3492 batches | lr 1.0e-04 | ms/batch 105.31 | aux 1.765 | main 0.162 | loss 0.180
+| epoch  18 |   200/ 3492 batches | lr 1.0e-04 | ms/batch 105.29 | aux 1.747 | main 0.158 | loss 0.175
+| epoch  18 |   300/ 3492 batches | lr 1.0e-04 | ms/batch 105.14 | aux 1.748 | main 0.159 | loss 0.176
+| epoch  18 |   400/ 3492 batches | lr 1.0e-04 | ms/batch 105.40 | aux 1.742 | main 0.161 | loss 0.178
+| epoch  18 |   500/ 3492 batches | lr 1.0e-04 | ms/batch 104.85 | aux 1.740 | main 0.164 | loss 0.181
+| epoch  18 |   600/ 3492 batches | lr 1.0e-04 | ms/batch 104.87 | aux 1.744 | main 0.165 | loss 0.182
+| epoch  18 |   700/ 3492 batches | lr 1.0e-04 | ms/batch 104.79 | aux 1.747 | main 0.164 | loss 0.181
+| epoch  18 |   800/ 3492 batches | lr 1.0e-04 | ms/batch 105.35 | aux 1.744 | main 0.159 | loss 0.176
+| epoch  18 |   900/ 3492 batches | lr 1.0e-04 | ms/batch 104.83 | aux 1.744 | main 0.162 | loss 0.180
+| epoch  18 |  1000/ 3492 batches | lr 1.0e-04 | ms/batch 105.11 | aux 1.748 | main 0.156 | loss 0.174
+| epoch  18 |  1100/ 3492 batches | lr 1.0e-04 | ms/batch 104.65 | aux 1.743 | main 0.161 | loss 0.178
+| epoch  18 |  1200/ 3492 batches | lr 1.0e-04 | ms/batch 105.80 | aux 1.745 | main 0.164 | loss 0.182
+| epoch  18 |  1300/ 3492 batches | lr 1.0e-04 | ms/batch 105.16 | aux 1.746 | main 0.158 | loss 0.175
+| epoch  18 |  1400/ 3492 batches | lr 1.0e-04 | ms/batch 104.52 | aux 1.746 | main 0.160 | loss 0.178
+| epoch  18 |  1500/ 3492 batches | lr 1.0e-04 | ms/batch 105.60 | aux 1.745 | main 0.157 | loss 0.175
+| epoch  18 |  1600/ 3492 batches | lr 1.0e-04 | ms/batch 105.35 | aux 1.748 | main 0.158 | loss 0.176
+| epoch  18 |  1700/ 3492 batches | lr 1.0e-04 | ms/batch 104.60 | aux 1.740 | main 0.164 | loss 0.182
+| epoch  18 |  1800/ 3492 batches | lr 1.0e-04 | ms/batch 105.14 | aux 1.736 | main 0.158 | loss 0.175
+| epoch  18 |  1900/ 3492 batches | lr 1.0e-04 | ms/batch 104.60 | aux 1.742 | main 0.161 | loss 0.179
+| epoch  18 |  2000/ 3492 batches | lr 1.0e-04 | ms/batch 105.51 | aux 1.741 | main 0.163 | loss 0.181
+| epoch  18 |  2100/ 3492 batches | lr 1.0e-04 | ms/batch 105.60 | aux 1.745 | main 0.156 | loss 0.174
+| epoch  18 |  2200/ 3492 batches | lr 1.0e-04 | ms/batch 104.55 | aux 1.742 | main 0.155 | loss 0.173
+| epoch  18 |  2300/ 3492 batches | lr 1.0e-04 | ms/batch 104.70 | aux 1.742 | main 0.165 | loss 0.182
+| epoch  18 |  2400/ 3492 batches | lr 1.0e-04 | ms/batch 105.93 | aux 1.742 | main 0.156 | loss 0.174
+| epoch  18 |  2500/ 3492 batches | lr 1.0e-04 | ms/batch 104.79 | aux 1.745 | main 0.153 | loss 0.171
+| epoch  18 |  2600/ 3492 batches | lr 1.0e-04 | ms/batch 105.19 | aux 1.743 | main 0.156 | loss 0.173
+| epoch  18 |  2700/ 3492 batches | lr 1.0e-04 | ms/batch 104.64 | aux 1.742 | main 0.157 | loss 0.175
+| epoch  18 |  2800/ 3492 batches | lr 1.0e-04 | ms/batch 105.57 | aux 1.741 | main 0.157 | loss 0.175
+| epoch  18 |  2900/ 3492 batches | lr 1.0e-04 | ms/batch 105.74 | aux 1.743 | main 0.163 | loss 0.180
+| epoch  18 |  3000/ 3492 batches | lr 1.0e-04 | ms/batch 104.84 | aux 1.745 | main 0.157 | loss 0.175
+| epoch  18 |  3100/ 3492 batches | lr 1.0e-04 | ms/batch 104.51 | aux 1.741 | main 0.160 | loss 0.177
+| epoch  18 |  3200/ 3492 batches | lr 1.0e-04 | ms/batch 105.17 | aux 1.740 | main 0.153 | loss 0.171
+| epoch  18 |  3300/ 3492 batches | lr 1.0e-04 | ms/batch 104.70 | aux 1.744 | main 0.158 | loss 0.175
+| epoch  18 |  3400/ 3492 batches | lr 1.0e-04 | ms/batch 105.61 | aux 1.744 | main 0.166 | loss 0.183
+-----------------------------------------------------------------------------------------
+| epoch  18 | valid aux    loss 1.674 | bpc    2.414
+| epoch  18 | valid main   loss 0.180 | scaled 0.180 | comb loss 0.196
+| epoch  18 | valid answer loss 0.120 | bpc    0.174 | F1 0.621
+-----------------------------------------------------------------------------------------
+| epoch  18 | test  aux    loss 1.675 | bpc    2.416
+| epoch  18 | test  main   loss 0.180 | scaled 0.180 | comb loss 0.197
+| epoch  18 | test  answer loss 0.120 | bpc    0.173 | F1 0.614
+-----------------------------------------------------------------------------------------
+```
+Training seems to have reached a steady state.
+
+What about increasing kernel size?
+```
+python train.py --dataset quora-large --levels 4 --ksize 5 --nhid 300 --optim='Adam' --lr 1e-3 --aux 0.01 --main 1 --gpu 0 --seq_len 1600 --validseqlen 1340 --dropout 0.05 --batch_size 16
+```
+Peak?
+```
+-----------------------------------------------------------------------------------------
+| epoch   8 | valid aux    loss 1.750 | bpc    2.524
+| epoch   8 | valid main   loss 0.183 | scaled 0.183 | comb loss 0.201
+| epoch   8 | valid answer loss 0.127 | bpc    0.183 | F1 0.607
+-----------------------------------------------------------------------------------------
+| epoch   8 | test  aux    loss 1.750 | bpc    2.525
+| epoch   8 | test  main   loss 0.182 | scaled 0.182 | comb loss 0.199
+| epoch   8 | test  answer loss 0.124 | bpc    0.179 | F1 0.601
+-----------------------------------------------------------------------------------------
+```
+
+What about adding another 1-width convolution at the end?
+```
+python train.py --dataset quora-large --levels 4 --ksize 5 --nhid 300 --optim='Adam' --lr 1e-3 --aux 0.01 --main 1 --gpu 0 --seq_len 1600 --validseqlen 1340 --dropout 0.05 --batch_size 16 --k1levels 1
+
+-----------------------------------------------------------------------------------------
+| epoch  11 | valid aux    loss 1.675 | bpc    2.417
+| epoch  11 | valid main   loss 0.185 | scaled 0.185 | comb loss 0.201
+| epoch  11 | valid answer loss 0.126 | bpc    0.181 | F1 0.612
+-----------------------------------------------------------------------------------------
+| epoch  11 | test  aux    loss 1.676 | bpc    2.418
+| epoch  11 | test  main   loss 0.183 | scaled 0.183 | comb loss 0.200
+| epoch  11 | test  answer loss 0.123 | bpc    0.178 | F1 0.603
+-----------------------------------------------------------------------------------------
+```
 

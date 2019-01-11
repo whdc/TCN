@@ -32,12 +32,16 @@ parser.add_argument('--ksize', type=int, default=3,
                     help='kernel size (default: 3)')
 parser.add_argument('--levels', type=int, default=3,
                     help='# of levels (default: 3)')
+parser.add_argument('--k1levels', type=int, default=0,
+                    help='# of levels (default: 0)')
 parser.add_argument('--log-interval', type=int, default=100, metavar='N',
                     help='report interval (default: 100')
 parser.add_argument('--lr', type=float, default=4,
                     help='initial learning rate (default: 4)')
+parser.add_argument('--aux', type=float, default=1,
+                    help='scale aux loss (default: 0)')
 parser.add_argument('--main', type=float, default=0,
-                    help='scale main loss before adding to aux loss (default: 0)')
+                    help='scale main loss (default: 0)')
 parser.add_argument('--emsize', type=int, default=100,
                     help='dimension of character embeddings (default: 100)')
 parser.add_argument('--optim', type=str, default='SGD',
@@ -68,13 +72,14 @@ trnqdata, trnadata = batchify(trnqstr, trnastr, args.batch_size, args)
 vldqdata, vldadata = batchify(vldqstr, vldastr, 1, args)
 tstqdata, tstadata = batchify(tstqstr, tstastr, 1, args)
 print("Corpus size: ", n_characters)
+print("Receptive field size: %d" % (1 + 2 * (args.ksize - 1) * (math.pow(2, args.levels+1) - 1)))
+print("Priming sequence size: %d" % (args.seq_len - args.validseqlen))
 
 
-num_chans = [args.nhid] * (args.levels - 1) + [args.emsize]
-k_size = args.ksize
-dropout = args.dropout
-emb_dropout = args.emb_dropout
-model = TCN(args.emsize, n_characters, n_labels, num_chans, kernel_size=k_size, dropout=dropout, emb_dropout=emb_dropout)
+num_chans = [args.nhid] * (args.levels - 1 + args.k1levels) + [args.emsize]
+kernel_sizes = [args.ksize] * args.levels + [1] * args.k1levels
+model = TCN(args.emsize, n_characters, n_labels, num_chans, kernel_sizes=kernel_sizes,
+            dropout=args.dropout, emb_dropout=args.emb_dropout)
 
 
 if args.cuda:
@@ -170,7 +175,7 @@ def train(epoch):
 
         aux_loss = aux_element_loss.mean()
         main_loss = main_element_loss.mean()
-        loss = aux_loss + args.main * main_loss
+        loss = args.aux * aux_loss + args.main * main_loss
         loss.backward()
 
         if args.clip > 0:
@@ -208,7 +213,7 @@ def main():
 
             print('-' * 89)
             valid_aux_loss, valid_main_loss, valid_answer_loss, f1 = evaluate(vldqdata, vldadata)
-            valid_loss = valid_aux_loss + args.main * valid_main_loss
+            valid_loss = args.aux * valid_aux_loss + args.main * valid_main_loss
             print('| epoch {:3d} | valid aux    loss {:5.3f} | bpc {:8.3f}'.format(
                 epoch, valid_aux_loss, valid_aux_loss / math.log(2)))
             print('| epoch {:3d} | valid main   loss {:5.3f} | scaled {:5.3f} | comb loss {:5.3f}'.format(
@@ -218,7 +223,7 @@ def main():
 
             print('-' * 89)
             test_aux_loss, test_main_loss, test_answer_loss, f1 = evaluate(tstqdata, tstadata)
-            test_loss = test_aux_loss + args.main * test_main_loss
+            test_loss = args.aux * test_aux_loss + args.main * test_main_loss
             print('| epoch {:3d} | test  aux    loss {:5.3f} | bpc {:8.3f}'.format(
                 epoch, test_aux_loss, test_aux_loss / math.log(2)))
             print('| epoch {:3d} | test  main   loss {:5.3f} | scaled {:5.3f} | comb loss {:5.3f}'.format(
