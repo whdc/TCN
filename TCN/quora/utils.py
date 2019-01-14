@@ -12,29 +12,34 @@ cuda = torch.cuda.is_available()
 
 
 def data_generator(args):
-    trnqfile = open('data/%s/train-q.txt' % args.dataset).read()
-    vldqfile = open('data/%s/valid-q.txt' % args.dataset).read()
-    tstqfile = open('data/%s/test-q.txt'  % args.dataset).read()
-
-    trnafile = open('data/%s/train-a.txt' % args.dataset).read()
-    vldafile = open('data/%s/valid-a.txt' % args.dataset).read()
-    tstafile = open('data/%s/test-a.txt'  % args.dataset).read()
-
-    corpus = Corpus(trnqfile + vldqfile + tstqfile)
-
-    if os.path.exists('data/' + args.dataset + '/data.pkl'):
+    if False and os.path.exists('data/' + args.dataset + '/data.pkl'): # disable
       data = pickle.load(open('data/' + args.dataset + '/data.pkl', 'rb'))
     else:
-      trnqstr = char_tensor(corpus, trnqfile)
-      vldqstr = char_tensor(corpus, vldqfile)
-      tstqstr = char_tensor(corpus, tstqfile)
+      trnqfile = open('data/%s/train-q.txt' % args.dataset).read()
+      vldqfile = open('data/%s/valid-q.txt' % args.dataset).read()
+      tstqfile = open('data/%s/test-q.txt'  % args.dataset).read()
+
+      if args.model == 'word':
+        trnqfile = trnqfile.split(' ')
+        vldqfile = vldqfile.split(' ')
+        tstqfile = tstqfile.split(' ')
+
+      trnafile = open('data/%s/train-a.txt' % args.dataset).read()
+      vldafile = open('data/%s/valid-a.txt' % args.dataset).read()
+      tstafile = open('data/%s/test-a.txt'  % args.dataset).read()
+
+      corpus = Corpus(trnqfile + vldqfile + tstqfile, args.thresh)
+
+      trnqstr = token_tensor(corpus, trnqfile)
+      vldqstr = token_tensor(corpus, vldqfile)
+      tstqstr = token_tensor(corpus, tstqfile)
       trnastr = torch.from_numpy(np.array(list(trnafile), dtype='uint8'))
       vldastr = torch.from_numpy(np.array(list(vldafile), dtype='uint8'))
       tstastr = torch.from_numpy(np.array(list(tstafile), dtype='uint8'))
 
-      n_characters = len(corpus.dict)
+      n_characters = corpus.num_tokens()
       n_labels = 2
-      idx_eol = corpus.dict.char2idx['\n']
+      idx_eol = corpus.lookup('\n')
 
       data = (trnqstr, vldqstr, tstqstr, trnastr, vldastr, tstastr, n_characters, n_labels, idx_eol)
       pickle.dump(data, open('data/' + args.dataset + '/data.pkl', 'wb'))
@@ -46,37 +51,32 @@ def read_file(filename):
     return file, len(file)
 
 
-class Dictionary(object):
-    def __init__(self):
-        self.char2idx = {}
-        self.idx2char = []
-        self.counter = Counter()
-
-    def add_word(self, char):
-        self.counter[char] += 1
-
-    def prep_dict(self):
-        for char in self.counter:
-            if char not in self.char2idx:
-                self.idx2char.append(char)
-                self.char2idx[char] = len(self.idx2char) - 1
-
-    def __len__(self):
-        return len(self.idx2char)
-
-
 class Corpus(object):
-    def __init__(self, string):
-        self.dict = Dictionary()
-        for c in string:
-            self.dict.add_word(c)
-        self.dict.prep_dict()
+    # Fine if `tokens` is just a string.
+    def __init__(self, tokens, thresh):
+        self.char2idx = {}
+        self.counter = Counter()
+        self.thresh = thresh
+        for token in tokens: 
+            self.counter[token] += 1
+        for token in self.counter:
+            if self.counter[token] > self.thresh and token not in self.char2idx:
+                self.char2idx[token] = len(self.char2idx)
+
+    def lookup(self, token):
+        if self.counter[token] > self.thresh:
+            return self.char2idx[token]
+        else:
+            return len(self.char2idx)
+    
+    def num_tokens(self):
+        return len(self.char2idx) + 1
 
 
-def char_tensor(corpus, string):
-    tensor = torch.zeros(len(string)).long()
-    for i in range(len(string)):
-        tensor[i] = corpus.dict.char2idx[string[i]]
+def token_tensor(corpus, tokens):
+    tensor = torch.zeros(len(tokens)).long()
+    for i in range(len(tokens)):
+        tensor[i] = corpus.lookup(tokens[i])
     return tensor
 
 

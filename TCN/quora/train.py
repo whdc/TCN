@@ -14,6 +14,10 @@ warnings.filterwarnings("ignore")   # Suppress the RunTimeWarning on unicode
 
 
 parser = argparse.ArgumentParser(description='Sequence Modeling - Character Level Language Model')
+parser.add_argument('--model', type=str, default='char',
+                    help='model type: char or word')
+parser.add_argument('--thresh', type=int, default=0,
+                    help='count higher than thresh required to enter vocab')
 parser.add_argument('--batch_size', type=int, default=32, metavar='N',
                     help='batch size (default: 32)')
 parser.add_argument('--cuda', action='store_false',
