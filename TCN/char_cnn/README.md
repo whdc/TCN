@@ -709,7 +709,18 @@ python train.py --dataset quora-large --levels 5 --ksize 3 --nhid 1400 --optim='
 | epoch   3 | test  answer loss 0.125 | bpc    0.180 | F1 0.588
 -----------------------------------------------------------------------------------------
 ```
-It runs really slow and is suprisingly lame so far.
+It runs really slow and is suprisingly lame so far. Peaks:
+```
+-----------------------------------------------------------------------------------------
+| epoch  16 | valid aux    loss 1.063 | bpc    1.534
+| epoch  16 | valid main   loss 0.182 | scaled 0.364 | comb loss 1.428
+| epoch  16 | valid answer loss 0.122 | bpc    0.176 | F1 0.621
+-----------------------------------------------------------------------------------------
+| epoch  16 | test  aux    loss 1.065 | bpc    1.537
+| epoch  16 | test  main   loss 0.183 | scaled 0.365 | comb loss 1.431
+| epoch  16 | test  answer loss 0.122 | bpc    0.176 | F1 0.613
+-----------------------------------------------------------------------------------------
+```
 
 What about just using main loss?
 ```
@@ -793,5 +804,20 @@ python train.py --dataset quora-large --levels 4 --ksize 5 --nhid 300 --optim='A
 | epoch  11 | test  main   loss 0.183 | scaled 0.183 | comb loss 0.200
 | epoch  11 | test  answer loss 0.123 | bpc    0.178 | F1 0.603
 -----------------------------------------------------------------------------------------
+```
+
+More hidden units:
+```
+python train.py --dataset quora-large --levels 5 --ksize 3 --nhid 500 --optim='Adam' --lr 1e-3 --aux 0.01 --main 1 --gpu 0 --seq_len 1600 --validseqlen 1340 --dropout 0.1 --batch_size 16
+```
+Peaks:
+```
+| epoch  28 | valid aux    loss 1.621 | bpc    2.338
+| epoch  28 | valid main   loss 0.179 | scaled 0.179 | comb loss 0.195
+| epoch  28 | valid answer loss 0.118 | bpc    0.171 | F1 0.624
+-----------------------------------------------------------------------------------------
+| epoch  28 | test  aux    loss 1.622 | bpc    2.340
+| epoch  28 | test  main   loss 0.180 | scaled 0.180 | comb loss 0.196
+| epoch  28 | test  answer loss 0.118 | bpc    0.170 | F1 0.615
 ```
 
