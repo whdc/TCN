@@ -12,7 +12,7 @@ cuda = torch.cuda.is_available()
 
 
 def data_generator(args):
-    if False and os.path.exists('data/' + args.dataset + '/data.pkl'): # disable
+    if os.path.exists('data/' + args.dataset + '/data.pkl'):
       data = pickle.load(open('data/' + args.dataset + '/data.pkl', 'rb'))
     else:
       trnqfile = open('data/%s/train-q.txt' % args.dataset).read()
@@ -50,6 +50,10 @@ def read_file(filename):
     file = unidecode.unidecode(open(filename).read())
     return file, len(file)
 
+class SpecialToken:
+    UNK = 0
+    PAD = 1
+    LEN = 2
 
 class Corpus(object):
     # Fine if `tokens` is just a string.
@@ -67,10 +71,10 @@ class Corpus(object):
         if self.counter[token] > self.thresh:
             return self.char2idx[token]
         else:
-            return len(self.char2idx)
+            return len(self.char2idx) + SpecialToken.UNK
     
     def num_tokens(self):
-        return len(self.char2idx) + 1
+        return len(self.char2idx) + SpecialToken.LEN
 
 
 def token_tensor(corpus, tokens):

@@ -18,6 +18,8 @@ parser.add_argument('--model', type=str, default='char',
                     help='model type: char or word')
 parser.add_argument('--thresh', type=int, default=0,
                     help='count higher than thresh required to enter vocab')
+parser.add_argument('--pool', action='store_true',
+                    help='max pool after convolutions')
 parser.add_argument('--batch_size', type=int, default=32, metavar='N',
                     help='batch size (default: 32)')
 parser.add_argument('--cuda', action='store_false',
@@ -83,7 +85,7 @@ print("Priming sequence size: %d" % (args.seq_len - args.validseqlen))
 num_chans = [args.nhid] * (args.levels - 1 + args.k1levels) + [args.emsize]
 kernel_sizes = [args.ksize] * args.levels + [1] * args.k1levels
 model = TCN(args.emsize, n_characters, n_labels, num_chans, kernel_sizes=kernel_sizes,
-            dropout=args.dropout, emb_dropout=args.emb_dropout)
+            dropout=args.dropout, emb_dropout=args.emb_dropout, pool=args.pool)
 
 
 if args.cuda:
