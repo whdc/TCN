@@ -112,11 +112,6 @@ def get_batch(qdata, adata, start_index, args):
     return inp, target, labels
 
 
-def save(model):
-    save_filename = 'model.pt'
-    torch.save(model, save_filename)
-    print('Saved as %s' % save_filename)
-
 def max_f1(labels, scores):
   # Sort labels by scores.
   y = np.array([l for l, s, in sorted(zip(labels, scores), key=lambda x: x[1])])

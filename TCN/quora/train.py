@@ -62,6 +62,10 @@ parser.add_argument('--seed', type=int, default=1111,
                     help='random seed (default: 1111)')
 parser.add_argument('--dataset', type=str, default='ptb',
                     help='dataset to use (default: ptb)')
+parser.add_argument('--load', type=str, default=None,
+                    help='file to load model from')
+parser.add_argument('--save', type=str, default='model.pt',
+                    help='file to save model as')
 args = parser.parse_args()
 
 # Set the random seed manually for reproducibility.
@@ -210,49 +214,50 @@ def train(epoch):
 
 def main():
     global lr
-    try:
-        print("Training for %d epochs..." % args.epochs)
-        all_losses = []
-        best_valid_loss = 1e7
-        for epoch in range(1, args.epochs + 1):
-            train(epoch)
 
-            print('-' * 89)
-            valid_aux_loss, valid_main_loss, valid_answer_loss, f1 = evaluate(vldqdata, vldadata)
-            valid_loss = args.aux * valid_aux_loss + args.main * valid_main_loss
-            print('| epoch {:3d} | valid aux    loss {:5.3f} | bpc {:8.3f}'.format(
-                epoch, valid_aux_loss, valid_aux_loss / math.log(2)))
-            print('| epoch {:3d} | valid main   loss {:5.3f} | scaled {:5.3f} | comb loss {:5.3f}'.format(
-                epoch, valid_main_loss, valid_main_loss * args.main, valid_loss))
-            print('| epoch {:3d} | valid answer loss {:5.3f} | bpc {:8.3f} | F1 {:5.3f}'.format(
-                epoch, valid_answer_loss, valid_answer_loss / math.log(2), f1))
+    if args.load:
+        print("Loading model state from %s ..." % args.load)
+        model.load_state_dict(torch.load(args.load))
 
-            print('-' * 89)
-            test_aux_loss, test_main_loss, test_answer_loss, f1 = evaluate(tstqdata, tstadata)
-            test_loss = args.aux * test_aux_loss + args.main * test_main_loss
-            print('| epoch {:3d} | test  aux    loss {:5.3f} | bpc {:8.3f}'.format(
-                epoch, test_aux_loss, test_aux_loss / math.log(2)))
-            print('| epoch {:3d} | test  main   loss {:5.3f} | scaled {:5.3f} | comb loss {:5.3f}'.format(
-                epoch, test_main_loss, test_main_loss * args.main, test_loss))
-            print('| epoch {:3d} | test  answer loss {:5.3f} | bpc {:8.3f} | F1 {:5.3f}'.format(
-                epoch, test_answer_loss, test_answer_loss / math.log(2), f1))
-            print('-' * 89)
+    print("Training for %d epochs..." % args.epochs)
+    all_losses = []
+    best_valid_loss = 1e7
+    for epoch in range(args.epochs):
 
-            if epoch > 5 and valid_loss > max(all_losses[-3:]):
-                lr = lr / 10.
-                for param_group in optimizer.param_groups:
-                    param_group['lr'] = lr
-            all_losses.append(valid_loss)
+        train(epoch)
 
-            if valid_loss < best_valid_loss:
-                print("Saving...")
-                save(model)
-                best_valid_loss = valid_loss
-
-    except KeyboardInterrupt:
         print('-' * 89)
-        print("Saving before quit...")
-        save(model)
+        valid_aux_loss, valid_main_loss, valid_answer_loss, f1 = evaluate(vldqdata, vldadata)
+        valid_loss = args.aux * valid_aux_loss + args.main * valid_main_loss
+        print('| epoch {:3d} | valid aux    loss {:5.3f} | bpc {:8.3f}'.format(
+            epoch, valid_aux_loss, valid_aux_loss / math.log(2)))
+        print('| epoch {:3d} | valid main   loss {:5.3f} | scaled {:5.3f} | comb loss {:5.3f}'.format(
+            epoch, valid_main_loss, valid_main_loss * args.main, valid_loss))
+        print('| epoch {:3d} | valid answer loss {:5.3f} | bpc {:8.3f} | F1 {:5.3f}'.format(
+            epoch, valid_answer_loss, valid_answer_loss / math.log(2), f1))
+
+        print('-' * 89)
+        test_aux_loss, test_main_loss, test_answer_loss, f1 = evaluate(tstqdata, tstadata)
+        test_loss = args.aux * test_aux_loss + args.main * test_main_loss
+        print('| epoch {:3d} | test  aux    loss {:5.3f} | bpc {:8.3f}'.format(
+            epoch, test_aux_loss, test_aux_loss / math.log(2)))
+        print('| epoch {:3d} | test  main   loss {:5.3f} | scaled {:5.3f} | comb loss {:5.3f}'.format(
+            epoch, test_main_loss, test_main_loss * args.main, test_loss))
+        print('| epoch {:3d} | test  answer loss {:5.3f} | bpc {:8.3f} | F1 {:5.3f}'.format(
+            epoch, test_answer_loss, test_answer_loss / math.log(2), f1))
+        print('-' * 89)
+
+        if epoch > 5 and valid_loss > max(all_losses[-3:]):
+            lr = lr / 10.
+            for param_group in optimizer.param_groups:
+                param_group['lr'] = lr
+        all_losses.append(valid_loss)
+
+        if valid_loss < best_valid_loss:
+            print('Saving model state to %s ...' % args.save)
+            torch.save(model.state_dict(), args.save)
+
+            best_valid_loss = valid_loss
 
     # Run on test data.
     test_loss = evaluate(test_data)
